@@ -69,15 +69,15 @@ class ThreadsController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param $channelId
+     * @param $channel
      * @param  \App\Thread $thread
      * @return \Illuminate\Http\Response
      */
-    public function show($channelId, Thread $thread)
+    public function show($channel, Thread $thread)
     {
         return view('threads.show', [
             'thread' => $thread,
-            'replies' => $thread->replies()->paginate(1)
+            'replies' => $thread->replies()->paginate(5)
         ]);
     }
 
@@ -107,12 +107,28 @@ class ThreadsController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Thread  $thread
-     * @return \Illuminate\Http\Response
+     * @param $channel
+     * @param \App\Thread $thread
+     * @return void
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function destroy(Thread $thread)
+    public function destroy($channel, Thread $thread)
     {
-        //
+        $this->authorize('update', $thread);
+
+
+//        if ($thread->user_id != auth()->id()){
+//            abort(403, 'You do not have permission to do this.');
+//        }
+        $thread->delete();
+
+        if (request()->wantsJson()){
+            return response([], 204);
+        }
+
+        return redirect('/threads');
+
+
     }
 
     /**
@@ -122,7 +138,7 @@ class ThreadsController extends Controller
      */
     protected function getThreads(Channel $channel, ThreadFilters $filters)
     {
-        $threads = Thread::filter($filters);
+        $threads = Thread::latest()->filter($filters);
 
         if ($channel->exists) {
             $threads->where('channel_id', $channel->id);
