@@ -46,8 +46,8 @@
                     </a>
                     <ul class="dropdown-menu">
 
-                        {{--<li> <a class="dropdown-item" href="#">Action</a> </li>--}}
-                        @foreach($channels as $channel)
+                        <li> <a class="dropdown-item" href="/channels/create">Action</a> </li>
+                        @foreach(App\Channel::all() as $channel)
                             <li><a class="dropdown-item" href="/threads/{{$channel->slug}}">{{$channel->name}}</a>
                             </li>
                         @endforeach
